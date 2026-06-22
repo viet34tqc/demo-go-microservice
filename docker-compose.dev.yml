@@ -1,0 +1,56 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.dev
+    container_name: mini_gateway_dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      # These keep dependency downloads and rebuilds faster between container restarts.
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    command: air -c cmd/gateway/.air.toml
+    depends_on:
+      - user-service
+      - todo-service
+
+  user-service:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.dev
+    container_name: mini_user_service_dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+    command: air -c cmd/user-service/.air.toml
+
+  todo-service:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.dev
+    container_name: mini_todo_service_dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+    command: air -c cmd/todo-service/.air.toml
+
+volumes:
+  go-mod-cache:
+  go-build-cache:

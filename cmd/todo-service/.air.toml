@@ -1,0 +1,53 @@
+# Air always starts from the container working directory.
+# docker-compose.dev.yml sets that directory to /app, which is the repo root.
+root = "."
+
+# Keep generated dev binaries outside the bind-mounted source tree.
+# This avoids creating build artifacts on the host and keeps file watching quiet.
+tmp_dir = "/tmp/air/todo-service"
+
+[build]
+# Rebuild only the todo-service command package when watched files change.
+cmd = "go build -o /tmp/air/todo-service/todo-service ./cmd/todo-service"
+
+# Run the freshly built todo-service binary after each successful build.
+entrypoint = ["/tmp/air/todo-service/todo-service"]
+
+# Debounce rapid file saves so Air does not rebuild multiple times in a row.
+delay = 1000
+
+# Watch only this service folder. Other services are mounted in the container,
+# but editing them should not restart todo-service.
+include_dir = ["cmd/todo-service"]
+
+# Rebuild for Go source and module dependency changes.
+include_ext = ["go", "mod", "sum"]
+
+# go.mod and go.sum live at the repo root, outside include_dir.
+include_file = ["go.mod", "go.sum"]
+
+# Ignore generated or irrelevant directories.
+exclude_dir = ["tmp", "vendor", ".git"]
+
+# Test files should not restart the running service.
+exclude_regex = ["_test.go"]
+
+# Docker Desktop on Windows can miss filesystem events from bind mounts.
+# Polling is less elegant than native events, but much more reliable here.
+poll = true
+poll_interval = 500
+
+# If a build fails, stop the old process so the broken state is obvious.
+stop_on_error = true
+
+# Ask the running process to exit cleanly before Air force-kills it.
+send_interrupt = true
+kill_delay = "500ms"
+
+[log]
+# Include timestamps in Air logs so rebuild timing is easy to follow.
+time = true
+
+[misc]
+# Remove the /tmp/air/todo-service directory when Air exits.
+clean_on_exit = true
