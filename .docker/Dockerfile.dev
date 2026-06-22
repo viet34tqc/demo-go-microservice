@@ -4,7 +4,3 @@ WORKDIR /app
 
 RUN apk add --no-cache git \
     && go install github.com/air-verse/air@latest
-
-ENV PATH="/go/bin:${PATH}"
-
-CMD ["air"]
