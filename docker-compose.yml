@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mini_maestro_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: demo_mircoservice
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d demo_mircoservice"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   gateway:
     build:
       context: .
@@ -21,6 +38,14 @@ services:
       - "8081:8081"
     environment:
       - PORT=8081
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=demo_mircoservice
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   todo-service:
     build:
@@ -31,3 +56,6 @@ services:
       - "8082:8082"
     environment:
       - PORT=8082
+
+volumes:
+  postgres_data:

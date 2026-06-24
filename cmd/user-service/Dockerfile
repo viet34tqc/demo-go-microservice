@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o user-service ./cmd/user-service
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o user-service ./cmd/user-service
 
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot

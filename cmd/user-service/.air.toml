@@ -8,7 +8,7 @@ tmp_dir = "/tmp/air/user-service"
 
 [build]
 # Rebuild only the user-service command package when watched files change.
-cmd = "go build -o /tmp/air/user-service/user-service ./cmd/user-service"
+cmd = "go build -buildvcs=false -o /tmp/air/user-service/user-service ./cmd/user-service"
 
 # Run the freshly built user-service binary after each successful build.
 entrypoint = ["/tmp/air/user-service/user-service"]
