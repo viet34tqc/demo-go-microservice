@@ -54,6 +54,7 @@ services:
       - DB_USER=postgres
       - DB_PASS=postgres
       - DB_NAME=demo_mircoservice
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
     command: air -c cmd/user-service/.air.toml
     depends_on:
       postgres:
@@ -79,6 +80,9 @@ services:
       - DB_PASS=postgres
       - DB_NAME=demo_mircoservice
     command: air -c cmd/todo-service/.air.toml
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

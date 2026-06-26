@@ -20,7 +20,7 @@ func Load() Config {
 		DBUser:    getEnv("DB_USER", "postgres"),
 		DBPass:    getEnv("DB_PASS", "postgres"),
 		DBName:    getEnv("DB_NAME", "demo_mircoservice"),
-		JWTSecret: getEnv("JWT_SECRET", "dev-secret"),
+		JWTSecret: getEnv("JWT_SECRET", ""),
 	}
 }
 

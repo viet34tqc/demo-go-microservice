@@ -43,6 +43,7 @@ services:
       - DB_USER=postgres
       - DB_PASS=postgres
       - DB_NAME=demo_mircoservice
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,6 +57,14 @@ services:
       - "8082:8082"
     environment:
       - PORT=8082
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=demo_mircoservice
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

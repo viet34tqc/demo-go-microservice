@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/viet34tqc/demo-go-microservice/cmd/user-service/internal/config"
 	"github.com/viet34tqc/demo-go-microservice/cmd/user-service/internal/model"
 	"github.com/viet34tqc/demo-go-microservice/cmd/user-service/internal/util"
@@ -43,10 +46,24 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	name := strings.TrimSpace(req.Name)
+	email := normalizeEmail(req.Email)
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "name is required",
+		})
+		return
+	}
+
 	var existingUser model.User
-	if err := h.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+	if err := h.DB.Where("email = ?", email).First(&existingUser).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{
 			"error": "email already exists",
+		})
+		return
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to check email",
 		})
 		return
 	}
@@ -60,12 +77,19 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	user := model.User{
-		Name:         req.Name,
-		Email:        req.Email,
+		Name:         name,
+		Email:        email,
 		PasswordHash: passwordHash,
 	}
 
 	if err := h.DB.Create(&user).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{
+				"error": "email already exists",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "failed to create user",
 		})
@@ -97,7 +121,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	var user model.User
-	if err := h.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+	if err := h.DB.Where("email = ?", normalizeEmail(req.Email)).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "invalid email or password",
 		})
@@ -153,4 +177,13 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"user": user,
 	})
+}
+
+func normalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }

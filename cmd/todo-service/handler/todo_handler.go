@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/viet34tqc/demo-go-microservice/cmd/todo-service/internal/model"
@@ -21,7 +22,7 @@ func NewTodoHandler(repo *repository.TodoRepository) *TodoHandler {
 }
 
 type createTodoRequest struct {
-	Title string `json:"title" binding:"required"`
+	Title string `json:"title" binding:"required,max=255"`
 }
 
 type updateTodoRequest struct {
@@ -40,9 +41,17 @@ func (h *TodoHandler) Create(c *gin.Context) {
 		return
 	}
 
+	title := strings.TrimSpace(req.Title)
+	if title == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "title is required",
+		})
+		return
+	}
+
 	todo := model.Todo{
 		UserID:    userID,
-		Title:     req.Title,
+		Title:     title,
 		Completed: false,
 	}
 
@@ -102,6 +111,13 @@ func (h *TodoHandler) Update(c *gin.Context) {
 		return
 	}
 
+	if req.Title == nil && req.Completed == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "at least one field is required",
+		})
+		return
+	}
+
 	todo, err := h.repo.FindByIDAndUserID(id, userID)
 	if err != nil {
 		handleTodoNotFoundOrError(c, err)
@@ -109,7 +125,15 @@ func (h *TodoHandler) Update(c *gin.Context) {
 	}
 
 	if req.Title != nil {
-		todo.Title = *req.Title
+		title := strings.TrimSpace(*req.Title)
+		if title == "" || len(title) > 255 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "title must be between 1 and 255 characters",
+			})
+			return
+		}
+
+		todo.Title = title
 	}
 
 	if req.Completed != nil {

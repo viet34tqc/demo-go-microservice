@@ -13,6 +13,9 @@ import (
 
 func main() {
 	cfg := config.Load()
+	if cfg.JWTSecret == "" {
+		log.Fatal("JWT_SECRET is required")
+	}
 
 	database, err := db.Connect(cfg)
 	if err != nil {
