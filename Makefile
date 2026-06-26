@@ -19,6 +19,9 @@ dev:
 dev-up:
 	$(COMPOSE_DEV) up -d
 
+down:
+	$(COMPOSE_DEV) down
+
 dev-build:
 	$(COMPOSE_DEV) build
 

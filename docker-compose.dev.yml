@@ -73,6 +73,11 @@ services:
       - '8082:8082'
     environment:
       - PORT=8082
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=demo_mircoservice
     command: air -c cmd/todo-service/.air.toml
 
 volumes:
