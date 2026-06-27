@@ -19,7 +19,7 @@ type AuthHandler struct {
 }
 
 type RegisterRequest struct {
-	Name     string `json:"name" binding:"required"`
+	Name     string `json:"name"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
@@ -48,12 +48,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	name := strings.TrimSpace(req.Name)
 	email := normalizeEmail(req.Email)
-	if name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "name is required",
-		})
-		return
-	}
 
 	var existingUser model.User
 	if err := h.DB.Where("email = ?", email).First(&existingUser).Error; err == nil {

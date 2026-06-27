@@ -30,6 +30,8 @@ services:
       - '8080:8080'
     environment:
       - PORT=8080
+      - USER_SERVICE_URL=http://user-service:8081
+      - TODO_SERVICE_URL=http://todo-service:8082
     command: air -c cmd/gateway/.air.toml
     depends_on:
       - user-service

@@ -6,6 +6,7 @@ Tài liệu học microservice bằng Go, đi từ setup project cơ bản tới
 
 1. [Lesson 1 - Setup project từ đầu](docs/lesson-01-setup-project.md)
 2. [Lesson 2 - Setup Docker và Air](docs/lesson-02-docker-air.md)
+3. [Lesson 3 - Gateway reverse proxy](docs/lesson-03-gateway-proxy.md)
 
 ## Project hiện tại
 

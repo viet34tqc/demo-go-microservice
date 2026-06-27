@@ -25,6 +25,8 @@ services:
       - "8080:8080"
     environment:
       - PORT=8080
+      - USER_SERVICE_URL=http://user-service:8081
+      - TODO_SERVICE_URL=http://todo-service:8082
     depends_on:
       - user-service
       - todo-service
