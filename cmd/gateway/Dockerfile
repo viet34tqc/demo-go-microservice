@@ -9,7 +9,7 @@ RUN go mod download
 COPY . .
 
 # Build source code from ./cmd/gateway to gateway folder in binary format
-RUN CGO_ENABLED=0 GOOS=linux go build -o gateway ./cmd/gateway
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o gateway ./cmd/gateway
 
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot

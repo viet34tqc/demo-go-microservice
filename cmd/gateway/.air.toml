@@ -8,7 +8,7 @@ tmp_dir = "/tmp/air/gateway"
 
 [build]
 # Rebuild only the gateway command package when watched files change.
-cmd = "go build -o /tmp/air/gateway/gateway ./cmd/gateway"
+cmd = "go build -buildvcs=false -o /tmp/air/gateway/gateway ./cmd/gateway"
 
 # Run the freshly built gateway binary after each successful build.
 entrypoint = ["/tmp/air/gateway/gateway"]
