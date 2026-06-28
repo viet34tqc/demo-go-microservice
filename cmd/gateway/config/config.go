@@ -6,27 +6,22 @@ type Config struct {
 	Port           string
 	UserServiceURL string
 	TodoServiceURL string
+	JWTSecret      string
 }
 
 func Load() Config {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	userServiceURL := os.Getenv("USER_SERVICE_URL")
-	if userServiceURL == "" {
-		userServiceURL = "http://localhost:8081"
-	}
-
-	todoServiceURL := os.Getenv("TODO_SERVICE_URL")
-	if todoServiceURL == "" {
-		todoServiceURL = "http://localhost:8082"
-	}
-
 	return Config{
-		Port:           port,
-		UserServiceURL: userServiceURL,
-		TodoServiceURL: todoServiceURL,
+		Port:           getEnv("PORT", "8080"),
+		UserServiceURL: getEnv("USER_SERVICE_URL", "http://localhost:8081"),
+		TodoServiceURL: getEnv("TODO_SERVICE_URL", "http://localhost:8082"),
+		JWTSecret:      getEnv("JWT_SECRET", "dev-secret"),
 	}
+}
+
+func getEnv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	return value
 }

@@ -32,6 +32,7 @@ services:
       - PORT=8080
       - USER_SERVICE_URL=http://user-service:8081
       - TODO_SERVICE_URL=http://todo-service:8082
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
     command: air -c cmd/gateway/.air.toml
     depends_on:
       - user-service

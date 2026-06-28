@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/viet34tqc/demo-go-microservice/cmd/gateway/config"
+	"github.com/viet34tqc/demo-go-microservice/cmd/gateway/internal/middleware"
 	"github.com/viet34tqc/demo-go-microservice/cmd/gateway/internal/proxy"
 )
 
@@ -24,22 +25,22 @@ func main() {
 		})
 	})
 
-	// Each proxy is a Gin handler that forwards matching gateway requests to
-	// the configured internal service URL.
+	jwtMiddleware := middleware.NewJWTMiddleware(cfg.JWTSecret)
 	userProxy := proxy.NewReverseProxy(cfg.UserServiceURL)
 	todoProxy := proxy.NewReverseProxy(cfg.TodoServiceURL)
 
-	// User service routes.
-	// r.Any keeps the gateway method-agnostic: GET, POST, PUT, DELETE, and
-	// other HTTP methods are forwarded unchanged to user-service.
-	r.Any("/api/auth/*path", userProxy)
-	r.Any("/api/users/*path", userProxy)
+	api := r.Group("/api")
 
-	// Todo service routes.
-	// Gin catch-all routes such as /api/todos/*path do not match /api/todos
-	// without the trailing slash, so the collection route is registered too.
-	r.Any("/api/todos", todoProxy)
-	r.Any("/api/todos/*path", todoProxy)
+	// Public auth routes
+	api.Any("/auth/*path", userProxy)
+
+	// Private routes
+	private := api.Group("")
+	private.Use(jwtMiddleware.RequireAuth())
+
+	private.Any("/users/*path", userProxy)
+	private.Any("/todos", todoProxy)
+	private.Any("/todos/*path", todoProxy)
 
 	r.Run(":" + port)
 }
