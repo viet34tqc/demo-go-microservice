@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -48,7 +49,7 @@ func (m *JWTMiddleware) RequireAuth() gin.HandlerFunc {
 			}
 
 			return []byte(m.secret), nil
-		})
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -68,14 +69,17 @@ func (m *JWTMiddleware) RequireAuth() gin.HandlerFunc {
 			return
 		}
 
-		userID, ok := claims["user_id"].(string)
-		if !ok || userID == "" {
+		// jwt.MapClaims decodes JSON numbers into float64, even though the
+		// user-service creates user_id from a Go uint.
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok || userIDFloat <= 0 || userIDFloat != float64(uint64(userIDFloat)) {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "missing user_id claim",
 			})
 			c.Abort()
 			return
 		}
+		userID := strconv.FormatUint(uint64(userIDFloat), 10)
 
 		// 5. Set user_id in context before fowarding the request to the next handler
 		c.Set("user_id", userID)
