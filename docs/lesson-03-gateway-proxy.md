@@ -183,3 +183,4 @@ Hoặc:
 docker compose -f docker-compose.dev.yml logs -f
 ```
 
+Ở Lesson 4, gateway sẽ được nâng cấp thêm JWT middleware để tách public route như `/api/auth/login` khỏi private route như `/api/users/me` và `/api/todos`.
