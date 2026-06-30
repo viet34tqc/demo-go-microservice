@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"os"
 
@@ -11,6 +12,11 @@ import (
 	"github.com/viet34tqc/demo-go-microservice/cmd/todo-service/internal/db"
 	"github.com/viet34tqc/demo-go-microservice/cmd/todo-service/middleware"
 	"github.com/viet34tqc/demo-go-microservice/cmd/todo-service/repository"
+	todoservice "github.com/viet34tqc/demo-go-microservice/cmd/todo-service/service"
+	"google.golang.org/grpc"
+
+	grpcserver "github.com/viet34tqc/demo-go-microservice/cmd/todo-service/internal/grpc"
+	todopb "github.com/viet34tqc/demo-go-microservice/gen/go/todo/v1"
 )
 
 func main() {
@@ -35,6 +41,9 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
+	todoService := todoservice.NewTodoService(database)
+	go startTodoGRPCServer(todoService)
+
 	todoRepo := repository.NewTodoRepository(database)
 	todoHandler := handler.NewTodoHandler(todoRepo)
 
@@ -49,4 +58,24 @@ func main() {
 	}
 
 	r.Run(":" + port)
+}
+
+func startTodoGRPCServer(todoService *todoservice.TodoService) {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen todo grpc server: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+
+	todopb.RegisterTodoServiceServer(
+		grpcServer,
+		grpcserver.NewTodoGRPCServer(todoService),
+	)
+
+	log.Println("todo-service gRPC server is running on :50051")
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve todo grpc server: %v", err)
+	}
 }
