@@ -8,6 +8,7 @@ Tài liệu học microservice bằng Go, đi từ setup project cơ bản tới
 2. [Lesson 2 - Setup Docker và Air](docs/lesson-02-docker-air.md)
 3. [Lesson 3 - Gateway reverse proxy](docs/lesson-03-gateway-proxy.md)
 4. [Lesson 4 - JWT middleware, public route và private route](docs/lesson-04-jwt-middleware-public-private-route.md)
+5. [Lesson 5 - Protobuf, Buf và generate file pb](docs/lesson-05-protobuf-buf-generate-pb.md)
 
 ## Project hiện tại
 
