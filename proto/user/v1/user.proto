@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "github.com/viet34tqc/demo-go-microservice/gen/go/user/v1;userv1";
+
+service UserService {
+  rpc Register(RegisterRequest) returns (AuthResponse);
+  rpc Login(LoginRequest) returns (AuthResponse);
+  rpc GetMe(GetMeRequest) returns (UserResponse);
+}
+
+message User {
+  uint64 id = 1;
+  string email = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message GetMeRequest {
+  uint64 user_id = 1;
+}
+
+message AuthResponse {
+  string token = 1;
+  User user = 2;
+}
+
+message UserResponse {
+  User user = 1;
+}
